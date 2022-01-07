@@ -85,35 +85,35 @@ module.exports = {
 
     if (!silent) {
       try {
-        var playingMessage = queue.textChannel.send({
-          embeds: [
-            {
-              author: {
-                name: "🎵 | Started playing"
-              },
-              title: `${song.title}`,
-              fields: [
-                {
-                  name: "Channel",
-                  value: song.author,
-                  inline: true
-                },
-                {
-                  name: "Duration",
-                  value: song.duration,
-                  inline: true
-                }
-              ],
-              url: song.url,
-              thumbnail: {
-                url: song.thumbnail
-              }
-            }
-          ]
-        });
-        // var playingMessage = await queue.textChannel.send(
-        //   i18n.__mf("play.startedPlaying", { title: song.title, url: song.url })
-        // );
+        // var playingMessage = queue.textChannel.send({
+        //   embeds: [
+        //     {
+        //       author: {
+        //         name: "🎵 | Started playing"
+        //       },
+        //       title: `${song.title}`,
+        //       fields: [
+        //         {
+        //           name: "Channel",
+        //           value: song.author,
+        //           inline: true
+        //         },
+        //         {
+        //           name: "Duration",
+        //           value: song.duration,
+        //           inline: true
+        //         }
+        //       ],
+        //       url: song.url,
+        //       thumbnail: {
+        //         url: song.thumbnail
+        //       }
+        //     }
+        //   ]
+        // });
+        var playingMessage = await queue.textChannel.send(
+          i18n.__mf("play.startedPlaying", { title: song.title, url: song.url })
+        );
         await playingMessage.react("⏭");
         await playingMessage.react("⏯");
         await playingMessage.react("🔇");

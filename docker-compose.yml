@@ -1,0 +1,10 @@
+version: "3.3"
+
+services:
+  discordbot:
+    image: musicbot
+    container_name: musicbot
+    build: .
+    restart: always
+    logging:
+      driver: journald
