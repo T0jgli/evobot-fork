@@ -2,9 +2,7 @@ const i18n = require("../util/i18n");
 const { play } = require("../include/play");
 const ytdl = require("ytdl-core");
 const YouTubeAPI = require("simple-youtube-api");
-const scdl = require("soundcloud-downloader").default;
-const https = require("https");
-const { YOUTUBE_API_KEY, SOUNDCLOUD_CLIENT_ID, DEFAULT_VOLUME, SPOTIFY_CLIENT_ID, SPOTIFY_SECRET_ID } = require("../util/Util");
+const { YOUTUBE_API_KEY, DEFAULT_VOLUME, SPOTIFY_CLIENT_ID, SPOTIFY_SECRET_ID } = require("../util/Util");
 const spotifyURI = require("spotify-uri");
 const Spotify = require("node-spotify-api");
 const youtube = new YouTubeAPI(YOUTUBE_API_KEY);
@@ -37,8 +35,6 @@ module.exports = {
     const search = args.join(" ");
     const videoPattern = /^(https?:\/\/)?(www\.)?(m\.|music\.)?(youtube\.com|youtu\.?be)\/.+$/gi;
     const playlistPattern = /^.*(list=)([^#\&\?]*).*/gi;
-    const scRegex = /^https?:\/\/(soundcloud\.com)\/(.*)$/;
-    const mobileScRegex = /^https?:\/\/(soundcloud\.app\.goo\.gl)\/(.*)$/;
     const spotifyPattern = /^.*(https:\/\/open\.spotify\.com\/track)([^#\&\?]*).*/gi;
     const spotifyValid = spotifyPattern.test(args[0]);
     const spotifyPlaylistPattern = /^.*(https:\/\/open\.spotify\.com\/playlist)([^#\&\?]*).*/gi;
@@ -53,22 +49,6 @@ module.exports = {
       return message.client.commands.get("playlist").execute(message, args);
     } else if (spotifyPlaylistValid) {
       return message.client.commands.get("playlist").execute(message, args);
-    }
-
-    if (mobileScRegex.test(url)) {
-      try {
-        https.get(url, function (res) {
-          if (res.statusCode == "302") {
-            return message.client.commands.get("play").execute(message, [res.headers.location]);
-          } else {
-            return message.reply(i18n.__("play.songNotFound")).catch(console.error);
-          }
-        });
-      } catch (error) {
-        console.error(error);
-        return message.reply(error.message).catch(console.error);
-      }
-      return message.reply("Following url redirection...").catch(console.error);
     }
 
     const queueConstruct = {
@@ -119,19 +99,6 @@ module.exports = {
           thumbnail: songInfo.player_response.videoDetails.thumbnail.thumbnails.slice(-1)[0].url,
           channel: songInfo.videoDetails.ownerChannelName,
           isLive: songInfo.videoDetails.isLiveContent,
-        };
-      } catch (error) {
-        console.error(error);
-        return message.reply(error.message).catch(console.error);
-      }
-    } else if (scRegex.test(url)) {
-      try {
-        const trackInfo = await scdl.getInfo(url, SOUNDCLOUD_CLIENT_ID);
-        song = {
-          title: trackInfo.title,
-          url: trackInfo.permalink_url,
-          duration: Math.ceil(trackInfo.duration / 1000),
-          thumbnail: "",
         };
       } catch (error) {
         console.error(error);
