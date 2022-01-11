@@ -9,7 +9,7 @@ const i18n = require("./util/i18n");
 
 const client = new Client({
   disableMentions: "everyone",
-  restTimeOffset: 0
+  restTimeOffset: 0,
 });
 
 client.login(TOKEN);
@@ -50,9 +50,7 @@ client.on("message", async (message) => {
   const args = message.content.slice(matchedPrefix.length).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();
 
-  const command =
-    client.commands.get(commandName) ||
-    client.commands.find((cmd) => cmd.aliases && cmd.aliases.includes(commandName));
+  const command = client.commands.get(commandName) || client.commands.find((cmd) => cmd.aliases && cmd.aliases.includes(commandName));
 
   if (!command) return;
 
@@ -69,9 +67,7 @@ client.on("message", async (message) => {
 
     if (now < expirationTime) {
       const timeLeft = (expirationTime - now) / 1000;
-      return message.reply(
-        i18n.__mf("common.cooldownMessage", { time: timeLeft.toFixed(1), name: command.name })
-      );
+      return message.reply(i18n.__mf("common.cooldownMessage", { time: timeLeft.toFixed(1), name: command.name }));
     }
   }
 
