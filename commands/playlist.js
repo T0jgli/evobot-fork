@@ -5,6 +5,8 @@ const YouTubeAPI = require("simple-youtube-api");
 const scdl = require("soundcloud-downloader").default;
 const { YOUTUBE_API_KEY, SOUNDCLOUD_CLIENT_ID, MAX_PLAYLIST_SIZE, DEFAULT_VOLUME } = require("../util/Util");
 const youtube = new YouTubeAPI(YOUTUBE_API_KEY);
+const ytsr = require("ytsr");
+const { getTracks } = require("spotify-url-info");
 
 module.exports = {
   name: "playlist",
@@ -15,10 +17,7 @@ module.exports = {
     const { channel } = message.member.voice;
     const serverQueue = message.client.queue.get(message.guild.id);
 
-    if (!args.length)
-      return message
-        .reply(i18n.__mf("playlist.usagesReply", { prefix: message.client.prefix }))
-        .catch(console.error);
+    if (!args.length) return message.reply(i18n.__mf("playlist.usagesReply", { prefix: message.client.prefix })).catch(console.error);
     if (!channel) return message.reply(i18n.__("playlist.errorNotChannel")).catch(console.error);
 
     const permissions = channel.permissionsFor(message.client.user);
@@ -26,12 +25,12 @@ module.exports = {
     if (!permissions.has("SPEAK")) return message.reply(i18n.__("missingPermissionSpeak"));
 
     if (serverQueue && channel !== message.guild.me.voice.channel)
-      return message
-        .reply(i18n.__mf("play.errorNotInSameChannel", { user: message.client.user }))
-        .catch(console.error);
+      return message.reply(i18n.__mf("play.errorNotInSameChannel", { user: message.client.user })).catch(console.error);
 
     const search = args.join(" ");
     const pattern = /^.*(youtu.be\/|list=)([^#\&\?]*).*/gi;
+    const spotifyPlaylistPattern = /^.*(https:\/\/open\.spotify\.com\/playlist)([^#\&\?]*).*/gi;
+    const spotifyPlaylistValid = spotifyPlaylistPattern.test(args[0]);
     const url = args[0];
     const urlValid = pattern.test(args[0]);
 
@@ -43,7 +42,7 @@ module.exports = {
       loop: false,
       volume: DEFAULT_VOLUME,
       muted: false,
-      playing: true
+      playing: true,
     };
 
     let playlist = null;
@@ -57,6 +56,42 @@ module.exports = {
         console.error(error);
         return message.reply(i18n.__("playlist.errorNotFoundPlaylist")).catch(console.error);
       }
+    } else if (spotifyPlaylistValid) {
+      try {
+        var fetching = await message.channel.send("Fetching....");
+        let playlistTrack = await getTracks(url);
+        playlistTrack.length = MAX_PLAYLIST_SIZE ? MAX_PLAYLIST_SIZE : 20;
+        playlist = playlistTrack.map((track) => ({
+          title: track.name,
+          url: track.external_urls.spotify,
+          duration: track.duration_ms / 1000,
+        }));
+
+        for (let i in playlistTrack) {
+          let result;
+          try {
+            if (fetching && i % 4 == 0) {
+              fetching.edit(`${i} songs fetched`);
+            }
+            const ytsrResult = await ytsr(`${playlistTrack[i].name} - ${playlistTrack[i].artists ? playlistTrack[i].artists[0].name : ""}`, {
+              limit: 1,
+            });
+            result = ytsrResult.items[0];
+          } catch (err) {
+            console.log(err);
+            return message.channel.send(err);
+          }
+          song = {
+            title: result.title,
+            url: result.url,
+            duration: this.convert(result.duration),
+          };
+          videos.push(song);
+        }
+      } catch (err) {
+        console.log(err);
+        return message.channel.send(err);
+      }
     } else if (scdl.isValidUrl(args[0])) {
       if (args[0].includes("/sets/")) {
         message.channel.send(i18n.__("playlist.fetchingPlaylist"));
@@ -64,7 +99,7 @@ module.exports = {
         videos = playlist.tracks.map((track) => ({
           title: track.title,
           url: track.permalink_url,
-          duration: track.duration / 1000
+          duration: track.duration / 1000,
         }));
       }
     } else {
@@ -84,22 +119,21 @@ module.exports = {
         return (song = {
           title: video.title,
           url: video.url,
-          duration: video.durationSeconds
+          duration: video.durationSeconds,
         });
       });
 
     serverQueue ? serverQueue.songs.push(...newSongs) : queueConstruct.songs.push(...newSongs);
 
     let playlistEmbed = new MessageEmbed()
-      .setTitle(`${playlist.title}`)
+      .setTitle(`${playlist.title ? playlist.title : "Spotify Playlist"}`)
       .setDescription(newSongs.map((song, index) => `${index + 1}. ${song.title}`))
       .setURL(playlist.url)
       .setColor("#F8AA2A")
       .setTimestamp();
 
     if (playlistEmbed.description.length >= 2048)
-      playlistEmbed.description =
-        playlistEmbed.description.substr(0, 2007) + i18n.__("playlist.playlistCharLimit");
+      playlistEmbed.description = playlistEmbed.description.substr(0, 2007) + i18n.__("playlist.playlistCharLimit");
 
     message.channel.send(i18n.__mf("playlist.startedPlaylist", { author: message.author }), playlistEmbed);
 
@@ -117,5 +151,16 @@ module.exports = {
         return message.channel.send(i18n.__mf("play.cantJoinChannel", { error: error })).catch(console.error);
       }
     }
-  }
+  },
+  convert(second) {
+    const a = second.split(":");
+    let rre;
+    if (a.length == 2) {
+      rre = a[0] * 60 + a[1];
+    } else {
+      rre = a[0] * 60 * 60 + a[1] * 60 + a[2];
+    }
+
+    return rre;
+  },
 };
