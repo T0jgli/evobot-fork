@@ -85,19 +85,7 @@ module.exports = {
     let songInfo = null;
     let song = null;
 
-    if (urlValid) {
-      try {
-        songInfo = await ytdl.getInfo(url);
-        song = {
-          title: songInfo.videoDetails.title,
-          url: songInfo.videoDetails.video_url,
-          duration: songInfo.videoDetails.lengthSeconds,
-        };
-      } catch (error) {
-        console.error(error);
-        return message.reply(error.message).catch(console.error);
-      }
-    } else if (spotifyValid) {
+    if (spotifyValid) {
       let spotifyTitle, spotifyArtist;
       const spotifyTrackID = spotifyURI.parse(url).id;
       const spotifyInfo = await spotify.request(`https://api.spotify.com/v1/tracks/${spotifyTrackID}`).catch((err) => {
@@ -117,6 +105,18 @@ module.exports = {
       } catch (err) {
         console.log(err);
         return message.channel.send(`Oops.. There was an error! \n ` + err);
+      }
+    } else if (urlValid) {
+      try {
+        songInfo = await ytdl.getInfo(url);
+        song = {
+          title: songInfo.videoDetails.title,
+          url: songInfo.videoDetails.video_url,
+          duration: songInfo.videoDetails.lengthSeconds,
+        };
+      } catch (error) {
+        console.error(error);
+        return message.reply(error.message).catch(console.error);
       }
     } else if (scRegex.test(url)) {
       try {

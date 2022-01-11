@@ -48,15 +48,7 @@ module.exports = {
     let playlist = null;
     let videos = [];
 
-    if (urlValid) {
-      try {
-        playlist = await youtube.getPlaylist(url, { part: "snippet" });
-        videos = await playlist.getVideos(MAX_PLAYLIST_SIZE || 10, { part: "snippet" });
-      } catch (error) {
-        console.error(error);
-        return message.reply(i18n.__("playlist.errorNotFoundPlaylist")).catch(console.error);
-      }
-    } else if (spotifyPlaylistValid) {
+    if (spotifyPlaylistValid) {
       try {
         var fetching = await message.channel.send("Fetching....");
         let playlistTrack = await getTracks(url);
@@ -91,6 +83,14 @@ module.exports = {
       } catch (err) {
         console.log(err);
         return message.channel.send(err);
+      }
+    } else if (urlValid) {
+      try {
+        playlist = await youtube.getPlaylist(url, { part: "snippet" });
+        videos = await playlist.getVideos(MAX_PLAYLIST_SIZE || 10, { part: "snippet" });
+      } catch (error) {
+        console.error(error);
+        return message.reply(i18n.__("playlist.errorNotFoundPlaylist")).catch(console.error);
       }
     } else if (scdl.isValidUrl(args[0])) {
       if (args[0].includes("/sets/")) {
