@@ -101,6 +101,9 @@ module.exports = {
           title: songInfo.videoDetails.title,
           url: songInfo.videoDetails.video_url,
           duration: songInfo.videoDetails.lengthSeconds,
+          thumbnail: songInfo.player_response.videoDetails.thumbnail.thumbnails.slice(-1)[0].url,
+          channel: songInfo.videoDetails.ownerChannelName,
+          isLive: songInfo.videoDetails.isLiveContent,
         };
       } catch (err) {
         console.log(err);
@@ -113,6 +116,9 @@ module.exports = {
           title: songInfo.videoDetails.title,
           url: songInfo.videoDetails.video_url,
           duration: songInfo.videoDetails.lengthSeconds,
+          thumbnail: songInfo.player_response.videoDetails.thumbnail.thumbnails.slice(-1)[0].url,
+          channel: songInfo.videoDetails.ownerChannelName,
+          isLive: songInfo.videoDetails.isLiveContent,
         };
       } catch (error) {
         console.error(error);
@@ -125,6 +131,7 @@ module.exports = {
           title: trackInfo.title,
           url: trackInfo.permalink_url,
           duration: Math.ceil(trackInfo.duration / 1000),
+          thumbnail: "",
         };
       } catch (error) {
         console.error(error);
@@ -144,6 +151,9 @@ module.exports = {
           title: songInfo.videoDetails.title,
           url: songInfo.videoDetails.video_url,
           duration: songInfo.videoDetails.lengthSeconds,
+          thumbnail: songInfo.player_response.videoDetails.thumbnail.thumbnails.slice(-1)[0].url,
+          channel: songInfo.videoDetails.ownerChannelName,
+          isLive: songInfo.videoDetails.isLiveContent,
         };
       } catch (error) {
         console.error(error);

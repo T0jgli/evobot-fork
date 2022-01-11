@@ -17,6 +17,7 @@ module.exports = {
       .setTitle(i18n.__("nowplaying.embedTitle"))
       .setDescription(`${song.title}\n${song.url}`)
       .setColor("#F8AA2A")
+      .setThumbnail(song.thumbnail)
       .setAuthor(message.client.user.username);
 
     if (song.duration > 0) {
@@ -29,11 +30,9 @@ module.exports = {
           (song.duration == 0 ? " ◉ LIVE" : new Date(song.duration * 1000).toISOString().substr(11, 8)),
         false
       );
-      nowPlaying.setFooter(
-        i18n.__mf("nowplaying.timeRemaining", { time: new Date(left * 1000).toISOString().substr(11, 8) })
-      );
+      nowPlaying.setFooter(i18n.__mf("nowplaying.timeRemaining", { time: new Date(left * 1000).toISOString().substr(11, 8) }));
     }
 
     return message.channel.send(nowPlaying);
-  }
+  },
 };

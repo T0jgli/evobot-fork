@@ -1,12 +1,9 @@
 const ytdl = require("ytdl-core-discord");
-const scdl = require("soundcloud-downloader").default;
 const { canModifyQueue, STAY_TIME } = require("../util/Util");
 const i18n = require("../util/i18n");
 
 module.exports = {
   async play(song, message, silent = false) {
-    const { SOUNDCLOUD_CLIENT_ID } = require("../util/Util");
-
     let config;
 
     try {
@@ -35,13 +32,6 @@ module.exports = {
     try {
       if (song.url.includes("youtube.com")) {
         stream = await ytdl(song.url, { highWaterMark: 1 << 25 });
-      } else if (song.url.includes("soundcloud.com")) {
-        try {
-          stream = await scdl.downloadFormat(song.url, scdl.FORMATS.OPUS, SOUNDCLOUD_CLIENT_ID);
-        } catch (error) {
-          stream = await scdl.downloadFormat(song.url, scdl.FORMATS.MP3, SOUNDCLOUD_CLIENT_ID);
-          streamType = "unknown";
-        }
       }
     } catch (error) {
       if (queue) {
@@ -50,9 +40,7 @@ module.exports = {
       }
 
       console.error(error);
-      return message.channel.send(
-        i18n.__mf("play.queueError", { error: error.message ? error.message : error })
-      );
+      return message.channel.send(i18n.__mf("play.queueError", { error: error.message ? error.message : error }));
     }
 
     queue.connection.on("disconnect", () => message.client.queue.delete(message.guild.id));
@@ -85,35 +73,32 @@ module.exports = {
 
     if (!silent) {
       try {
-        // var playingMessage = queue.textChannel.send({
-        //   embeds: [
-        //     {
-        //       author: {
-        //         name: "🎵 | Started playing"
-        //       },
-        //       title: `${song.title}`,
-        //       fields: [
-        //         {
-        //           name: "Channel",
-        //           value: song.author,
-        //           inline: true
-        //         },
-        //         {
-        //           name: "Duration",
-        //           value: song.duration,
-        //           inline: true
-        //         }
-        //       ],
-        //       url: song.url,
-        //       thumbnail: {
-        //         url: song.thumbnail
-        //       }
-        //     }
-        //   ]
-        // });
-        var playingMessage = await queue.textChannel.send(
-          i18n.__mf("play.startedPlaying", { title: song.title, url: song.url })
-        );
+        var playingMessage = await queue.textChannel.send({
+          embed: {
+            author: {
+              name: "🎵 | Started playing",
+            },
+            title: `${song.title}`,
+            fields: [
+              {
+                name: "Channel",
+                value: song.channel,
+                inline: true,
+              },
+              {
+                name: "Duration",
+                value: song.isLive ? "🔴 Live" : new Date(song.duration * 1000).toISOString().substr(14, 5),
+                inline: true,
+              },
+            ],
+            url: song.url,
+            thumbnail: {
+              url: song.thumbnail,
+            },
+          },
+        });
+
+        //var playingMessage = await queue.textChannel.send(i18n.__mf("play.startedPlaying", { title: song.title, url: song.url }));
         await playingMessage.react("⏭");
         await playingMessage.react("⏯");
         await playingMessage.react("🔇");
@@ -128,7 +113,7 @@ module.exports = {
 
       const filter = (reaction, user) => user.id !== message.client.user.id;
       var collector = playingMessage.createReactionCollector(filter, {
-        time: song.duration > 0 ? song.duration * 1000 : 600000
+        time: song.duration > 0 ? song.duration * 1000 : 600000,
       });
 
       collector.on("collect", (reaction, user) => {
@@ -178,9 +163,7 @@ module.exports = {
             if (!canModifyQueue(member)) return i18n.__("common.errorNotChannel");
             queue.volume = Math.max(queue.volume - 10, 0);
             queue.connection.dispatcher.setVolumeLogarithmic(queue.volume / 100);
-            queue.textChannel
-              .send(i18n.__mf("play.decreasedVolume", { author: user, volume: queue.volume }))
-              .catch(console.error);
+            queue.textChannel.send(i18n.__mf("play.decreasedVolume", { author: user, volume: queue.volume })).catch(console.error);
             break;
 
           case "🔊":
@@ -189,9 +172,7 @@ module.exports = {
             if (!canModifyQueue(member)) return i18n.__("common.errorNotChannel");
             queue.volume = Math.min(queue.volume + 10, 100);
             queue.connection.dispatcher.setVolumeLogarithmic(queue.volume / 100);
-            queue.textChannel
-              .send(i18n.__mf("play.increasedVolume", { author: user, volume: queue.volume }))
-              .catch(console.error);
+            queue.textChannel.send(i18n.__mf("play.increasedVolume", { author: user, volume: queue.volume })).catch(console.error);
             break;
 
           case "🔁":
@@ -202,7 +183,7 @@ module.exports = {
               .send(
                 i18n.__mf("play.loopSong", {
                   author: user,
-                  loop: queue.loop ? i18n.__("common.on") : i18n.__("common.off")
+                  loop: queue.loop ? i18n.__("common.on") : i18n.__("common.off"),
                 })
               )
               .catch(console.error);
@@ -249,5 +230,5 @@ module.exports = {
         }
       });
     }
-  }
+  },
 };
