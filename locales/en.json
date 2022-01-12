@@ -1,13 +1,4 @@
 {
-  "clip": {
-    "description": "Plays a clip sound",
-    "usagesReply": "Usage: /clip <name>",
-    "errorQueue": "Can't play clip because there is an active queue.",
-    "errorNotChannel": "You need to join a voice channel first!"
-  },
-  "clips": {
-    "description": "List all clips"
-  },
   "help": {
     "description": "Display all commands and descriptions",
     "embedTitle": "{botname} Help",
@@ -20,12 +11,6 @@
     "description": "Toggle music loop",
     "errorNotQueue": "There is nothing playing.",
     "result": "Loop is now {loop}"
-  },
-  "lyrics": {
-    "description": "Get lyrics for the currently playing song",
-    "errorNotQueue": "There is nothing playing.",
-    "lyricsNotFound": "No lyrics found for {title}.",
-    "embedTitle": "{title} - Lyrics"
   },
   "move": {
     "description": "Move songs around in the queue",
