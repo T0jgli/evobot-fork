@@ -56,7 +56,7 @@
     "loopSong": "<@{author}> Loop is now {loop}",
     "stopSong": "<@{author}> ⏹ stopped the music!",
     "leaveChannel": "Leaving voice channel...",
-    "songNotFound": "Audio Not Found",
+    "songNotFound": "Hát ez nem jött be boss... :(",
     "songAccessErr": "Video is age restricted, private or unavailable"
   },
   "playlist": {

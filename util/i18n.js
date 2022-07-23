@@ -3,30 +3,7 @@ const { join } = require("path");
 const i18n = require("i18n");
 
 i18n.configure({
-  locales: [
-    "ar",
-    "de",
-    "el",
-    "en",
-    "es",
-    "fr",
-    "id",
-    "it",
-    "ja",
-    "ko",
-    "nl",
-    "pl",
-    "pt_br",
-    "ru",
-    "sv",
-    "th",
-    "tr",
-    "uk",
-    "vi",
-    "zh_cn",
-    "zh_sg",
-    "zh_tw"
-  ],
+  locales: ["en"],
   directory: join(__dirname, "..", "locales"),
   defaultLocale: "en",
   retryInDefaultLocale: true,
@@ -47,8 +24,8 @@ i18n.configure({
 
   mustacheConfig: {
     tags: ["{{", "}}"],
-    disable: false
-  }
+    disable: false,
+  },
 });
 
 i18n.setLocale(LOCALE);
