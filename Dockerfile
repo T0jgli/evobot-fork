@@ -2,7 +2,7 @@ FROM node:lts-alpine
 
 # install python and make
 RUN apk update || : && \
-	apk add python3 gcc make musl-dev
+	apk add python3 gcc build-essential
 
 WORKDIR /app
 
