@@ -181,7 +181,10 @@ export class MusicQueue {
     let playingMessage: Message;
 
     try {
-      playingMessage = await this.textChannel.send((newState.resource as AudioResource<Song>).metadata.startMessage());
+      //playingMessage = await this.textChannel.send((newState.resource as AudioResource<Song>).metadata.startMessage());
+      playingMessage = await this.textChannel.send({
+        embeds: [(newState.resource as AudioResource<Song>).metadata.startMessage()]
+      });
 
       await playingMessage.react("⏭");
       await playingMessage.react("⏯");
@@ -201,7 +204,7 @@ export class MusicQueue {
 
     const collector = playingMessage.createReactionCollector({
       filter,
-      time: song.duration > 0 ? song.duration * 1000 : 600000
+      time: song?.durationSec! > 0 ? song?.durationSec! * 1000 : 600000
     });
 
     collector.on("collect", async (reaction, user) => {

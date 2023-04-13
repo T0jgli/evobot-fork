@@ -2,23 +2,36 @@ import { AudioResource, createAudioResource, StreamType } from "@discordjs/voice
 import youtube from "youtube-sr";
 import { i18n } from "../utils/i18n";
 import { videoPattern, isURL } from "../utils/patterns";
-const { stream , video_basic_info } = require('play-dl');
+import { video_basic_info, stream } from "play-dl";
+import { Readable } from "stream";
 
 export interface SongData {
   url: string;
   title: string;
-  duration: number;
+  duration: string;
+  thumbnail: string;
+  channel: string;
+  isLive: boolean;
+  durationSec?: number;
 }
 
 export class Song {
   public readonly url: string;
   public readonly title: string;
-  public readonly duration: number;
+  public readonly duration: string;
+  public readonly thumbnail: string;
+  public readonly channel: string;
+  public readonly isLive: boolean;
+  public readonly durationSec?: number;
 
-  public constructor({ url, title, duration }: SongData) {
+  public constructor({ url, title, duration, thumbnail, channel, isLive, durationSec }: SongData) {
     this.url = url;
     this.title = title;
     this.duration = duration;
+    this.thumbnail = thumbnail;
+    this.channel = channel;
+    this.isLive = isLive;
+    this.durationSec = durationSec;
   }
 
   public static async from(url: string = "", search: string = "") {
@@ -30,12 +43,15 @@ export class Song {
       songInfo = await video_basic_info(url);
 
       return new this({
-        url: songInfo.video_details.url,
-        title: songInfo.video_details.title,
-        duration: parseInt(songInfo.video_details.durationInSec)
+        title: songInfo.video_details.title || "",
+        url: songInfo.video_details.url || "",
+        thumbnail: songInfo.video_details.thumbnails[0].url,
+        channel: songInfo.video_details.channel?.name || "",
+        isLive: songInfo.video_details.live,
+        duration: songInfo.video_details.durationRaw,
+        durationSec: songInfo.video_details.durationInSec
       });
-    } 
-    else {
+    } else {
       const result = await youtube.searchOne(search);
 
       result ? null : console.log(`No results found for ${search}`); // This is for handling the case where no results are found (spotify links for example)
@@ -51,16 +67,19 @@ export class Song {
       songInfo = await video_basic_info(`https://youtube.com/watch?v=${result.id}`);
 
       return new this({
-        url: songInfo.video_details.url,
-        title: songInfo.video_details.title,
-        duration: parseInt(songInfo.video_details.durationInSec)
+        title: songInfo.video_details.title || "",
+        url: songInfo.video_details.url || "",
+        thumbnail: songInfo.video_details.thumbnails[0].url,
+        channel: songInfo.video_details.channel?.name || "",
+        isLive: songInfo.video_details.live,
+        duration: songInfo.video_details.durationRaw,
+        durationSec: songInfo.video_details.durationInSec
       });
     }
   }
 
   public async makeResource(): Promise<AudioResource<Song> | void> {
     let playStream;
-
     let type = this.url.includes("youtube.com") ? StreamType.Opus : StreamType.OggOpus;
 
     const source = this.url.includes("youtube") ? "youtube" : "soundcloud";
@@ -71,10 +90,38 @@ export class Song {
 
     if (!stream) return;
 
-    return createAudioResource(playStream.stream, { metadata: this, inputType: playStream.type, inlineVolume: true });
+    return createAudioResource(playStream?.stream as Readable, {
+      metadata: this,
+      inputType: playStream?.type,
+      inlineVolume: true
+    });
   }
 
   public startMessage() {
-    return i18n.__mf("play.startedPlaying", { title: this.title, url: this.url });
+    return {
+      author: {
+        name: "🎵 | Started playing"
+      },
+      title: `${this.title}`,
+      fields: [
+        {
+          name: "Channel",
+          value: this.channel,
+          inline: true
+        },
+        {
+          name: "Duration",
+          value: this.isLive ? "🔴 Live" : this.duration.toString(),
+          inline: true
+        }
+      ],
+      duration: this.duration.toString(),
+      url: this.url,
+      thumbnail: {
+        url: this.thumbnail
+      }
+    };
+
+    //return i18n.__mf("play.startedPlaying", { title: this.title, url: this.url });
   }
 }

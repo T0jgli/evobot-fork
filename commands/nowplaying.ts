@@ -14,22 +14,22 @@ export default {
 
     const song = queue.songs[0];
     const seek = queue.resource.playbackDuration / 1000;
-    const left = song.duration - seek;
+    const left = song?.durationSec! - seek;
 
     let nowPlaying = new EmbedBuilder()
       .setTitle(i18n.__("nowplaying.embedTitle"))
       .setDescription(`${song.title}\n${song.url}`)
       .setColor("#F8AA2A");
 
-    if (song.duration > 0) {
+    if (song?.durationSec! > 0) {
       nowPlaying.addFields({
         name: "\u200b",
         value:
           new Date(seek * 1000).toISOString().substr(11, 8) +
           "[" +
-          splitBar(song.duration == 0 ? seek : song.duration, seek, 20)[0] +
+          splitBar(song?.durationSec! == 0 ? seek : song?.durationSec!, seek, 20)[0] +
           "]" +
-          (song.duration == 0 ? " ◉ LIVE" : new Date(song.duration * 1000).toISOString().substr(11, 8)),
+          (song?.durationSec! == 0 ? " ◉ LIVE" : new Date(song?.durationSec! * 1000).toISOString().substr(11, 8)),
         inline: false
       });
 

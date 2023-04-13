@@ -1,0 +1,10 @@
+version: "3.3"
+
+services:
+  musicbotdiscordv3:
+    image: musicbot
+    container_name: musicbot
+    build: .
+    env_file: .env
+    labels:
+      - traefik.enable=false
