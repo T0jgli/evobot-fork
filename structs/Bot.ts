@@ -7,7 +7,8 @@ import {
   Interaction,
   REST,
   Routes,
-  Snowflake
+  Snowflake,
+  ActivityType
 } from "discord.js";
 import { readdirSync } from "fs";
 import { join } from "path";
@@ -31,7 +32,7 @@ export class Bot {
 
     this.client.on("ready", () => {
       console.log(`${this.client.user!.username} ready!`);
-
+      this.client.user?.setActivity("MOST MÁR /play (/help)", { type: ActivityType.Listening });
       this.registerSlashCommands();
     });
 
