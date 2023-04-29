@@ -30,7 +30,7 @@ export class Playlist {
     const urlValid = pattern.test(url);
     let playlist;
 
-    if (urlValid) {
+    if (youtube.isPlaylist(url)) {
       playlist = await youtube.getPlaylist(url);
     } else {
       const result = await youtube.searchOne(search, "playlist");

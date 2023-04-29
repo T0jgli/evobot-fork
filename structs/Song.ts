@@ -1,8 +1,8 @@
 import { AudioResource, createAudioResource, StreamType } from "@discordjs/voice";
 import youtube from "youtube-sr";
 import { i18n } from "../utils/i18n";
-import { videoPattern, isURL } from "../utils/patterns";
-import { video_basic_info, stream } from "play-dl";
+import { videoPattern, isURL, spotifyPattern } from "../utils/patterns";
+import { video_basic_info, stream, SpotifyTrack, spotify } from "play-dl";
 import { Readable } from "stream";
 
 export interface SongData {
@@ -36,21 +36,19 @@ export class Song {
 
   public static async from(url: string = "", search: string = "") {
     const isYoutubeUrl = videoPattern.test(url);
+    const isSpotifyUrl = spotifyPattern.test(search);
 
     let songInfo;
 
     if (isYoutubeUrl) {
       songInfo = await video_basic_info(url);
+    } else if (isSpotifyUrl) {
+      const spotifyInfo = (await spotify(url)) as SpotifyTrack;
+      const spotifyTitle = spotifyInfo.name;
+      const spotifyArtist = spotifyInfo.artists[0].name;
 
-      return new this({
-        title: songInfo.video_details.title || "",
-        url: songInfo.video_details.url || "",
-        thumbnail: songInfo.video_details.thumbnails[0].url,
-        channel: songInfo.video_details.channel?.name || "",
-        isLive: songInfo.video_details.live,
-        duration: songInfo.video_details.durationRaw,
-        durationSec: songInfo.video_details.durationInSec
-      });
+      const result = await youtube.searchOne(`${spotifyArtist} - ${spotifyTitle}`);
+      songInfo = await video_basic_info(`https://youtube.com/watch?v=${result.id}`);
     } else {
       const result = await youtube.searchOne(search);
 
@@ -65,17 +63,16 @@ export class Song {
       }
 
       songInfo = await video_basic_info(`https://youtube.com/watch?v=${result.id}`);
-
-      return new this({
-        title: songInfo.video_details.title || "",
-        url: songInfo.video_details.url || "",
-        thumbnail: songInfo.video_details.thumbnails[0].url,
-        channel: songInfo.video_details.channel?.name || "",
-        isLive: songInfo.video_details.live,
-        duration: songInfo.video_details.durationRaw,
-        durationSec: songInfo.video_details.durationInSec
-      });
     }
+    return new this({
+      title: songInfo.video_details.title || "",
+      url: songInfo.video_details.url || "",
+      thumbnail: songInfo.video_details.thumbnails[0].url,
+      channel: songInfo.video_details.channel?.name || "",
+      isLive: songInfo.video_details.live,
+      duration: songInfo.video_details.durationRaw,
+      durationSec: songInfo.video_details.durationInSec
+    });
   }
 
   public async makeResource(): Promise<AudioResource<Song> | void> {

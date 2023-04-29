@@ -25,8 +25,7 @@ export default {
     PermissionsBitField.Flags.ManageMessages
   ],
   async execute(interaction: ChatInputCommandInteraction) {
-    let argSongName = interaction.options.getString("playlist");
-
+    let argSongName = interaction.options.getString("playlist") ?? interaction.options.getString("song");
     const guildMemer = interaction.guild!.members.cache.get(interaction.user.id);
     const { channel } = guildMemer!.voice;
 
@@ -49,6 +48,7 @@ export default {
           .catch(console.error);
 
     let playlist;
+    console.log(argSongName!.split(" ")[0]);
 
     try {
       playlist = await Playlist.from(argSongName!.split(" ")[0], argSongName!);

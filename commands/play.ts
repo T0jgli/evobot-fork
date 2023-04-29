@@ -5,6 +5,7 @@ import { MusicQueue } from "../structs/MusicQueue";
 import { Song } from "../structs/Song";
 import { i18n } from "../utils/i18n";
 import { playlistPattern } from "../utils/patterns";
+import youtube from "youtube-sr";
 
 export default {
   data: new SlashCommandBuilder()
@@ -49,7 +50,8 @@ export default {
     else await interaction.reply("⏳ Loading...");
 
     // Start the playlist if playlist url was provided
-    if (playlistPattern.test(url)) {
+    if (youtube.isPlaylist(url)) {
+      //if (playlistPattern.test(url)) {
       await interaction.editReply("🔗 Link is playlist").catch(console.error);
 
       return bot.slashCommandsMap.get("playlist")!.execute(interaction);
