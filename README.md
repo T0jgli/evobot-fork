@@ -1,6 +1,6 @@
 ![Node build](https://github.com/eritislami/evobot/actions/workflows/node.yml/badge.svg)
 ![Docker build](https://github.com/eritislami/evobot/actions/workflows/docker.yml/badge.svg)
-[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
+![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)
 
 ![logo](https://repository-images.githubusercontent.com/186841818/8aa95700-7730-11e9-84be-e80f28520325)
 
@@ -10,8 +10,8 @@
 
 ## Requirements
 
-1. Discord Bot Token **[Guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot)**  
-   1.1. Enable 'Message Content Intent' in Discord Developer Portal
+1. Discord Bot Token [**Guide**](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot)  
+   1\.1. Enable 'Message Content Intent' in Discord Developer Portal
 2. Node.js 16.11.0 or newer
 
 ## 🚀 Getting Started
