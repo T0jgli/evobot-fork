@@ -16,6 +16,6 @@ jobs:
           username: ${{secrets.SSH_USERNAME}}
 
           script: |
-            cd /home/ubuntu/musicbot
+            cd /home/github/musicbot
             git pull
             docker compose up --build -d
