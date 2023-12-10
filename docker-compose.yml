@@ -9,3 +9,4 @@ services:
     env_file: .env
     labels:
       - traefik.enable=false
+      - "com.centurylinklabs.watchtower.enable=false"
