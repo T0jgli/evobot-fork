@@ -6,6 +6,6 @@ services:
     container_name: musicbot
     build: .
     restart: unless-stopped
-    # env_file: .env
+    env_file: stack.env
     labels:
       - traefik.enable=false
