@@ -5,32 +5,17 @@ on:
     branches: [master]
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-      packages: write
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Deploy app
+        uses: appleboy/ssh-action@master
         with:
-          role-to-assume: arn:aws:iam::574681690878:role/githubRole
-          aws-region: eu-central-1
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-      - name: Build and push
-        id: build-image
-        uses: docker/build-push-action@v3
-        with:
-          platforms: linux/arm64
-          push: true
-          tags: ${{ steps.login-ecr.outputs.registry }}/musicbot:latest
-          build-args: ${{ secrets.ENV_FILE }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          host: ${{secrets.SSH_HOST}}
+          key: ${{secrets.SSH_KEY}}
+          username: ${{secrets.SSH_USERNAME}}
+
+          script: |
+            cd /home/github/musicbot
+            git pull
+            docker compose up --build -d
