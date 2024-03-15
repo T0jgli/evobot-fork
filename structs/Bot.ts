@@ -32,7 +32,7 @@ export class Bot {
 
     this.client.on("ready", () => {
       console.log(`${this.client.user!.username} ready!`);
-      this.client.user?.setActivity("MOST MÁR /play (/help)", { type: ActivityType.Listening });
+      this.client.user?.setActivity("/play (/help)", { type: ActivityType.Listening });
       this.registerSlashCommands();
     });
 
